@@ -45,11 +45,18 @@ class ModelArtifact:
         self, frame: pd.DataFrame, probability: float, limit: int = 4
     ) -> list[dict[str, Any]]:
         """Model-agnostic local perturbations; directional influence, not causality."""
-        contributions = []
+        reference_frames = []
         for feature in RAW_FEATURES:
             reference = frame.copy()
             reference.loc[0, feature] = self.reference_values[feature]
-            reference_probability = float(self.pipeline.predict_proba(reference)[0, 1])
+            reference_frames.append(reference)
+        reference_probabilities = self.pipeline.predict_proba(
+            pd.concat(reference_frames, ignore_index=True)
+        )[:, 1]
+        contributions = []
+        for feature, reference_probability in zip(
+            RAW_FEATURES, reference_probabilities, strict=True
+        ):
             delta = probability - reference_probability
             contributions.append(
                 {

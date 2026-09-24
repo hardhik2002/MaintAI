@@ -1,0 +1,13 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+*.db
+frontend/node_modules
+frontend/dist
+ml/data/raw/*.csv
+ml/artifacts/*.joblib
+ml/reports/figures

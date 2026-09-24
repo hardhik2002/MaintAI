@@ -148,6 +148,11 @@ def train(data_path: Path, artifact_path: Path, report_dir: Path) -> dict[str, o
     selected_name = max(comparisons, key=lambda name: comparisons[name]["pr_auc"])
     raw_pipeline = make_pipeline(candidate_models()[selected_name])
     raw_pipeline.fit(X_train, y_train)
+    # Candidate fitting can use every core, but serving must avoid thread
+    # oversubscription when several telemetry requests arrive together.
+    selected_estimator = raw_pipeline.named_steps["model"]
+    if hasattr(selected_estimator, "n_jobs"):
+        selected_estimator.set_params(n_jobs=1)
     calibrated = CalibratedClassifierCV(FrozenEstimator(raw_pipeline), method="sigmoid")
     calibrated.fit(X_validation, y_validation)
     validation_probabilities = calibrated.predict_proba(X_validation)[:, 1]

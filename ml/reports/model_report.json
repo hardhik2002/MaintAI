@@ -1,6 +1,6 @@
 {
-  "model_version": "ai4i-20260924175251",
-  "trained_at": "2026-09-24T17:52:51.512733+00:00",
+  "model_version": "ai4i-20260924180352",
+  "trained_at": "2026-09-24T18:03:52.235860+00:00",
   "algorithm": "random_forest",
   "dataset": "UCI AI4I 2020 (ID 601)",
   "dataset_is_synthetic": true,
@@ -19,7 +19,7 @@
     "osf",
     "rnf"
   ],
-  "decision_threshold": 0.1740646007820481,
+  "decision_threshold": 0.17406460078204797,
   "risk_mapping": {
     "HEALTHY": "p < 0.0435",
     "LOW": "0.0435 <= p < 0.1044",

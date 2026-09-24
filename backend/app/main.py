@@ -9,12 +9,14 @@ from backend.app.api.routes import router
 from backend.app.core.config import get_settings
 from backend.app.core.database import create_tables
 from backend.app.core.logging import configure_logging
+from backend.app.services.model_service import get_model
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     configure_logging()
     create_tables()
+    get_model()
     yield
 
 
