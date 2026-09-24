@@ -55,5 +55,7 @@ def default_fleet() -> list[MachineSimulator]:
         ("MACHINE-005", "M", "heat_stress"),
         ("MACHINE-006", "L", "overstrain"),
     ]
-    return [MachineSimulator(machine, kind, scenario, seed=42 + index * 17) for index, (machine, kind, scenario) in enumerate(scenarios)]
-
+    return [
+        MachineSimulator(machine, kind, scenario, seed=42 + index * 17)
+        for index, (machine, kind, scenario) in enumerate(scenarios)
+    ]

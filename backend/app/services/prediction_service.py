@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 ALERT_LEVELS = {"HIGH", "CRITICAL"}
 
 
-def predict_and_store(payload: TelemetryInput, session: Session, request_id: str) -> TelemetryRecord:
+def predict_and_store(
+    payload: TelemetryInput, session: Session, request_id: str
+) -> TelemetryRecord:
     started = perf_counter()
     result = get_model().predict(payload.model_dump())
     elapsed_ms = (perf_counter() - started) * 1_000
@@ -43,8 +45,10 @@ def predict_and_store(payload: TelemetryInput, session: Session, request_id: str
     logger.info(
         "inference_complete",
         extra={
-            "request_id": request_id, "machine_id": record.machine_id,
-            "model_version": result["model_version"], "duration_ms": round(elapsed_ms, 2),
+            "request_id": request_id,
+            "machine_id": record.machine_id,
+            "model_version": result["model_version"],
+            "duration_ms": round(elapsed_ms, 2),
             "risk_level": record.risk_level,
         },
     )
@@ -57,14 +61,17 @@ def _create_transition_alert(session: Session, record: TelemetryRecord) -> None:
     previous = session.scalar(
         select(TelemetryRecord)
         .where(TelemetryRecord.machine_id == record.machine_id, TelemetryRecord.id != record.id)
-        .order_by(desc(TelemetryRecord.timestamp)).limit(1)
+        .order_by(desc(TelemetryRecord.timestamp))
+        .limit(1)
     )
     if previous and previous.risk_level == record.risk_level:
         return
     session.add(
         AlertRecord(
-            timestamp=record.timestamp, machine_id=record.machine_id,
-            severity=record.risk_level, risk_score=record.failure_probability,
+            timestamp=record.timestamp,
+            machine_id=record.machine_id,
+            severity=record.risk_level,
+            risk_score=record.failure_probability,
             message=f"{record.machine_id} entered {record.risk_level} risk state",
         )
     )
@@ -73,11 +80,16 @@ def _create_transition_alert(session: Session, record: TelemetryRecord) -> None:
 def monitoring_summary(session: Session) -> dict[str, object]:
     rows = session.execute(
         select(
-            func.count(TelemetryRecord.id), func.avg(TelemetryRecord.inference_ms),
+            func.count(TelemetryRecord.id),
+            func.avg(TelemetryRecord.inference_ms),
             func.sum(func.json_array_length(TelemetryRecord.warnings)),
         )
     ).one()
-    counts = dict(session.execute(select(TelemetryRecord.risk_level, func.count()).group_by(TelemetryRecord.risk_level)).all())
+    counts = dict(
+        session.execute(
+            select(TelemetryRecord.risk_level, func.count()).group_by(TelemetryRecord.risk_level)
+        ).all()
+    )
     total = int(rows[0] or 0)
     high = counts.get("HIGH", 0) + counts.get("CRITICAL", 0)
     return {

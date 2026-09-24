@@ -10,7 +10,11 @@ import numpy as np
 import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import ExtraTreesClassifier, HistGradientBoostingClassifier, RandomForestClassifier
+from sklearn.ensemble import (
+    ExtraTreesClassifier,
+    HistGradientBoostingClassifier,
+    RandomForestClassifier,
+)
 from sklearn.frozen import FrozenEstimator
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
@@ -54,26 +58,41 @@ def candidate_models() -> dict[str, object]:
             class_weight="balanced", max_iter=2_000, random_state=SEED
         ),
         "random_forest": RandomForestClassifier(
-            n_estimators=350, min_samples_leaf=2, class_weight="balanced_subsample",
-            n_jobs=-1, random_state=SEED,
+            n_estimators=350,
+            min_samples_leaf=2,
+            class_weight="balanced_subsample",
+            n_jobs=-1,
+            random_state=SEED,
         ),
         "extra_trees": ExtraTreesClassifier(
-            n_estimators=350, min_samples_leaf=2, class_weight="balanced",
-            n_jobs=-1, random_state=SEED,
+            n_estimators=350,
+            min_samples_leaf=2,
+            class_weight="balanced",
+            n_jobs=-1,
+            random_state=SEED,
         ),
         "hist_gradient_boosting": HistGradientBoostingClassifier(
-            learning_rate=0.07, max_iter=250, max_leaf_nodes=21,
-            class_weight="balanced", random_state=SEED,
+            learning_rate=0.07,
+            max_iter=250,
+            max_leaf_nodes=21,
+            class_weight="balanced",
+            random_state=SEED,
         ),
     }
 
 
-def select_threshold(y_true: pd.Series, probabilities: np.ndarray) -> tuple[float, dict[str, float]]:
+def select_threshold(
+    y_true: pd.Series, probabilities: np.ndarray
+) -> tuple[float, dict[str, float]]:
     precision, recall, thresholds = precision_recall_curve(y_true, probabilities)
-    # F2 gives missed failures four times the weight of false alerts while requiring useful precision.
+    # F2 gives missed failures four times the weight of false alerts.
+    # The precision floor keeps the resulting maintenance queue useful.
     beta_sq = 4.0
-    f2 = (1 + beta_sq) * precision[:-1] * recall[:-1] / (
-        beta_sq * precision[:-1] + recall[:-1] + 1e-12
+    f2 = (
+        (1 + beta_sq)
+        * precision[:-1]
+        * recall[:-1]
+        / (beta_sq * precision[:-1] + recall[:-1] + 1e-12)
     )
     eligible = np.where(precision[:-1] >= 0.25, f2, -1)
     index = int(np.argmax(eligible)) if eligible.max() >= 0 else int(np.argmax(f2))
@@ -113,7 +132,10 @@ def train(data_path: Path, artifact_path: Path, report_dir: Path) -> dict[str, o
     comparisons: dict[str, dict[str, float]] = {}
     for name, estimator in candidate_models().items():
         scores = cross_validate(
-            make_pipeline(estimator), X_train, y_train, cv=folds,
+            make_pipeline(estimator),
+            X_train,
+            y_train,
+            cv=folds,
             scoring={"pr_auc": "average_precision", "roc_auc": "roc_auc", "recall": "recall"},
             n_jobs=-1,
         )
@@ -134,8 +156,13 @@ def train(data_path: Path, artifact_path: Path, report_dir: Path) -> dict[str, o
     test_metrics = metrics(y_test, test_probabilities, threshold)
 
     permutation = permutation_importance(
-        calibrated, X_test, y_test, scoring="average_precision", n_repeats=12,
-        random_state=SEED, n_jobs=-1,
+        calibrated,
+        X_test,
+        y_test,
+        scoring="average_precision",
+        n_repeats=12,
+        random_state=SEED,
+        n_jobs=-1,
     )
     importance = sorted(
         [
@@ -144,7 +171,8 @@ def train(data_path: Path, artifact_path: Path, report_dir: Path) -> dict[str, o
                 RAW_FEATURES, permutation.importances_mean, permutation.importances_std, strict=True
             )
         ],
-        key=lambda item: item["importance"], reverse=True,
+        key=lambda item: item["importance"],
+        reverse=True,
     )
     calibration_true, calibration_pred = calibration_curve(
         y_test, test_probabilities, n_bins=6, strategy="quantile"
@@ -185,7 +213,8 @@ def train(data_path: Path, artifact_path: Path, report_dir: Path) -> dict[str, o
     }
     training_ranges = {
         name: {"min": float(X_train[name].min()), "max": float(X_train[name].max())}
-        for name in RAW_FEATURES if name != "type"
+        for name in RAW_FEATURES
+        if name != "type"
     }
     artifact = ModelArtifact(calibrated, metadata, reference_values, training_ranges)
     artifact_path.parent.mkdir(parents=True, exist_ok=True)
@@ -208,4 +237,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

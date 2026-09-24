@@ -59,4 +59,6 @@ class ModelArtifact:
                     "direction": "increases" if delta >= 0 else "decreases",
                 }
             )
-        return sorted(contributions, key=lambda item: abs(item["contribution"]), reverse=True)[:limit]
+        return sorted(contributions, key=lambda item: abs(item["contribution"]), reverse=True)[
+            :limit
+        ]

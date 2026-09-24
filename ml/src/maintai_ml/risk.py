@@ -12,4 +12,3 @@ def risk_level(probability: float, decision_threshold: float) -> str:
     if probability >= decision_threshold * 0.25:
         return "LOW"
     return "HEALTHY"
-

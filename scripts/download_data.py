@@ -18,7 +18,9 @@ def main() -> None:
     with zipfile.ZipFile(io.BytesIO(payload)) as archive:
         data = archive.read("ai4i2020.csv")
     DESTINATION.write_bytes(data)
-    print(f"Downloaded {DESTINATION} ({len(data):,} bytes, sha256={hashlib.sha256(data).hexdigest()})")
+    print(
+        f"Downloaded {DESTINATION} ({len(data):,} bytes, sha256={hashlib.sha256(data).hexdigest()})"
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,21 @@
+{
+  "rows": 10000,
+  "columns": 14,
+  "missing_values": 0,
+  "duplicate_rows": 0,
+  "failure_count": 339,
+  "failure_rate": 0.0339,
+  "failure_mode_target_inconsistencies": 27,
+  "type_distribution": {
+    "H": 1003,
+    "L": 6000,
+    "M": 2997
+  },
+  "failure_modes": {
+    "twf": 46,
+    "hdf": 115,
+    "pwf": 95,
+    "osf": 98,
+    "rnf": 19
+  }
+}

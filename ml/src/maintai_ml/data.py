@@ -44,4 +44,3 @@ def validate_dataset(frame: pd.DataFrame) -> dict[str, object]:
         "type_distribution": frame["type"].value_counts().sort_index().to_dict(),
         "failure_modes": frame[FAILURE_MODE_COLUMNS].sum().astype(int).to_dict(),
     }
-

@@ -27,9 +27,7 @@ def build_features(frame: pd.DataFrame) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Missing model features: {sorted(missing)}")
     result = frame[RAW_FEATURES].copy()
-    result["temperature_difference"] = (
-        result["process_temperature"] - result["air_temperature"]
-    )
+    result["temperature_difference"] = result["process_temperature"] - result["air_temperature"]
     # Angular velocity (rad/s) times torque (N.m), converted to kW.
     result["mechanical_power_kw"] = (
         2 * np.pi * result["rotational_speed"] * result["torque"] / 60_000
@@ -42,7 +40,7 @@ def build_features(frame: pd.DataFrame) -> pd.DataFrame:
 class PhysicalFeatureEngineer(BaseEstimator, TransformerMixin):
     """Sklearn-compatible wrapper that keeps feature logic in the saved pipeline."""
 
-    def fit(self, X: pd.DataFrame, y: object = None) -> "PhysicalFeatureEngineer":
+    def fit(self, X: pd.DataFrame, y: object = None) -> PhysicalFeatureEngineer:
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -50,4 +48,3 @@ class PhysicalFeatureEngineer(BaseEstimator, TransformerMixin):
 
     def get_feature_names_out(self, input_features: object = None) -> np.ndarray:
         return np.asarray(RAW_FEATURES + ENGINEERED_FEATURES, dtype=object)
-

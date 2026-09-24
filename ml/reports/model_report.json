@@ -1,0 +1,153 @@
+{
+  "model_version": "ai4i-20260924175251",
+  "trained_at": "2026-09-24T17:52:51.512733+00:00",
+  "algorithm": "random_forest",
+  "dataset": "UCI AI4I 2020 (ID 601)",
+  "dataset_is_synthetic": true,
+  "features": [
+    "type",
+    "air_temperature",
+    "process_temperature",
+    "rotational_speed",
+    "torque",
+    "tool_wear"
+  ],
+  "excluded_leakage_columns": [
+    "twf",
+    "hdf",
+    "pwf",
+    "osf",
+    "rnf"
+  ],
+  "decision_threshold": 0.1740646007820481,
+  "risk_mapping": {
+    "HEALTHY": "p < 0.0435",
+    "LOW": "0.0435 <= p < 0.1044",
+    "MEDIUM": "0.1044 <= p < 0.1741",
+    "HIGH": "0.1741 <= p < 0.2611",
+    "CRITICAL": "p >= 0.2611"
+  },
+  "failure_mode_prediction_supported": false,
+  "test_metrics": {
+    "precision": 0.8484848484848485,
+    "recall": 0.8235294117647058,
+    "f1": 0.835820895522388,
+    "pr_auc": 0.8759295946116069,
+    "roc_auc": 0.9712999330166849,
+    "brier_score": 0.008540041781349646,
+    "confusion_matrix": [
+      [
+        1922,
+        10
+      ],
+      [
+        12,
+        56
+      ]
+    ]
+  },
+  "model_comparison": {
+    "logistic_regression": {
+      "pr_auc": 0.4732850554363492,
+      "roc_auc": 0.92162003111641,
+      "recall": 0.8376829268292683,
+      "pr_auc_std": 0.060959699009839496
+    },
+    "random_forest": {
+      "pr_auc": 0.8952939760527011,
+      "roc_auc": 0.9765690242051999,
+      "recall": 0.7935365853658537,
+      "pr_auc_std": 0.04560615048961389
+    },
+    "extra_trees": {
+      "pr_auc": 0.8205209682998917,
+      "roc_auc": 0.968558226346485,
+      "recall": 0.7392682926829268,
+      "pr_auc_std": 0.0650344632833244
+    },
+    "hist_gradient_boosting": {
+      "pr_auc": 0.8837629164736936,
+      "roc_auc": 0.9606014764693034,
+      "recall": 0.7984146341463415,
+      "pr_auc_std": 0.04724374155874806
+    }
+  },
+  "threshold_selection": {
+    "selection_metric": "F2 with validation precision >= 0.25",
+    "validation_precision": 0.8059701492537313,
+    "validation_recall": 0.7941176470588235,
+    "validation_f2": 0.7964601769909521
+  },
+  "feature_importance": [
+    {
+      "feature": "torque",
+      "importance": 0.668309506325135,
+      "std": 0.021039843185589675
+    },
+    {
+      "feature": "rotational_speed",
+      "importance": 0.4946468167027966,
+      "std": 0.03839946680216182
+    },
+    {
+      "feature": "air_temperature",
+      "importance": 0.4568510095928486,
+      "std": 0.044406331607365575
+    },
+    {
+      "feature": "tool_wear",
+      "importance": 0.29126934221076856,
+      "std": 0.0304588461314809
+    },
+    {
+      "feature": "process_temperature",
+      "importance": 0.21620586656216886,
+      "std": 0.03696548734178045
+    },
+    {
+      "feature": "type",
+      "importance": 0.030116453991811103,
+      "std": 0.012340565567549193
+    }
+  ],
+  "calibration_curve": {
+    "mean_predicted_probability": [
+      0.005329841847099941,
+      0.005490958547974967,
+      0.005904639883766761,
+      0.18153294710377413
+    ],
+    "observed_failure_rate": [
+      0.0009149130832570906,
+      0.008333333333333333,
+      0.0,
+      0.19461077844311378
+    ]
+  },
+  "split": {
+    "train": 6000,
+    "validation": 2000,
+    "test": 2000
+  },
+  "data_quality": {
+    "rows": 10000,
+    "columns": 14,
+    "missing_values": 0,
+    "duplicate_rows": 0,
+    "failure_count": 339,
+    "failure_rate": 0.0339,
+    "failure_mode_target_inconsistencies": 27,
+    "type_distribution": {
+      "H": 1003,
+      "L": 6000,
+      "M": 2997
+    },
+    "failure_modes": {
+      "twf": 46,
+      "hdf": 115,
+      "pwf": 95,
+      "osf": 98,
+      "rnf": 19
+    }
+  }
+}

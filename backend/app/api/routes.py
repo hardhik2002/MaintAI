@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
-from backend.app.core.config import get_settings
 from backend.app.core.database import get_session
 from backend.app.models.database import AlertRecord, TelemetryRecord
 from backend.app.schemas.prediction import (
@@ -61,7 +60,9 @@ def ready(session: Session = Depends(get_session)) -> dict[str, str]:
 
 
 @router.post("/api/v1/predict", response_model=PredictionResponse, status_code=201)
-def predict(payload: TelemetryInput, request: Request, session: Session = Depends(get_session)) -> PredictionResponse:
+def predict(
+    payload: TelemetryInput, request: Request, session: Session = Depends(get_session)
+) -> PredictionResponse:
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
     return prediction_response(predict_and_store(payload, session, request_id))
 
@@ -70,14 +71,22 @@ def predict(payload: TelemetryInput, request: Request, session: Session = Depend
 def machines(session: Session = Depends(get_session)) -> list[MachineSummary]:
     latest_ids = select(func.max(TelemetryRecord.id)).group_by(TelemetryRecord.machine_id)
     records = session.scalars(
-        select(TelemetryRecord).where(TelemetryRecord.id.in_(latest_ids)).order_by(desc(TelemetryRecord.failure_probability))
+        select(TelemetryRecord)
+        .where(TelemetryRecord.id.in_(latest_ids))
+        .order_by(desc(TelemetryRecord.failure_probability))
     ).all()
     return [
         MachineSummary(
-            machine_id=row.machine_id, type=row.machine_type, timestamp=row.timestamp,
-            risk_level=row.risk_level, failure_probability=row.failure_probability,
-            air_temperature=row.air_temperature, process_temperature=row.process_temperature,
-            rotational_speed=row.rotational_speed, torque=row.torque, tool_wear=row.tool_wear,
+            machine_id=row.machine_id,
+            type=row.machine_type,
+            timestamp=row.timestamp,
+            risk_level=row.risk_level,
+            failure_probability=row.failure_probability,
+            air_temperature=row.air_temperature,
+            process_temperature=row.process_temperature,
+            rotational_speed=row.rotational_speed,
+            torque=row.torque,
+            tool_wear=row.tool_wear,
         )
         for row in records
     ]
@@ -86,7 +95,10 @@ def machines(session: Session = Depends(get_session)) -> list[MachineSummary]:
 @router.get("/api/v1/machines/{machine_id}", response_model=PredictionResponse)
 def machine(machine_id: str, session: Session = Depends(get_session)) -> PredictionResponse:
     record = session.scalar(
-        select(TelemetryRecord).where(TelemetryRecord.machine_id == machine_id.upper()).order_by(desc(TelemetryRecord.timestamp)).limit(1)
+        select(TelemetryRecord)
+        .where(TelemetryRecord.machine_id == machine_id.upper())
+        .order_by(desc(TelemetryRecord.timestamp))
+        .limit(1)
     )
     if record is None:
         raise HTTPException(status_code=404, detail="Machine not found")
@@ -100,8 +112,10 @@ def history(
     session: Session = Depends(get_session),
 ) -> list[PredictionResponse]:
     records: Sequence[TelemetryRecord] = session.scalars(
-        select(TelemetryRecord).where(TelemetryRecord.machine_id == machine_id.upper())
-        .order_by(desc(TelemetryRecord.timestamp)).limit(limit)
+        select(TelemetryRecord)
+        .where(TelemetryRecord.machine_id == machine_id.upper())
+        .order_by(desc(TelemetryRecord.timestamp))
+        .limit(limit)
     ).all()
     return [prediction_response(row) for row in reversed(records)]
 
@@ -110,7 +124,11 @@ def history(
 def alerts(
     limit: int = Query(default=50, ge=1, le=200), session: Session = Depends(get_session)
 ) -> list[AlertRecord]:
-    return list(session.scalars(select(AlertRecord).order_by(desc(AlertRecord.timestamp)).limit(limit)).all())
+    return list(
+        session.scalars(
+            select(AlertRecord).order_by(desc(AlertRecord.timestamp)).limit(limit)
+        ).all()
+    )
 
 
 @router.get("/api/v1/model/info")

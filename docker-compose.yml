@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      MAINTAI_DATABASE_URL: sqlite:////data/maintai.db
+      MAINTAI_MODEL_PATH: /app/ml/artifacts/model.joblib
+      MAINTAI_CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+    volumes:
+      - maintai_data:/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: ["python", "-m", "simulator.main", "--api-url", "http://backend:8000", "--interval", "2"]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  maintai_data:
+

@@ -18,10 +18,16 @@ async def run(api_url: str, interval: float, iterations: int | None) -> None:
     async with httpx.AsyncClient(timeout=15) as client:
         while iterations is None or completed < iterations:
             responses = await asyncio.gather(
-                *(client.post(f"{api_url}/api/v1/predict", json=machine.next_reading()) for machine in fleet),
+                *(
+                    client.post(f"{api_url}/api/v1/predict", json=machine.next_reading())
+                    for machine in fleet
+                ),
                 return_exceptions=True,
             )
-            successful = sum(isinstance(response, httpx.Response) and response.is_success for response in responses)
+            successful = sum(
+                isinstance(response, httpx.Response) and response.is_success
+                for response in responses
+            )
             logger.info("sent telemetry for %s/%s machines", successful, len(fleet))
             completed += 1
             await asyncio.sleep(interval)

@@ -23,7 +23,9 @@ def run(data_path: Path, report_dir: Path) -> None:
     sns.set_theme(style="whitegrid")
     fig, axes = plt.subplots(2, 3, figsize=(14, 8))
     for column, axis in zip([f for f in RAW_FEATURES if f != "type"], axes.flat, strict=False):
-        sns.histplot(frame, x=column, hue="machine_failure", stat="density", common_norm=False, ax=axis)
+        sns.histplot(
+            frame, x=column, hue="machine_failure", stat="density", common_norm=False, ax=axis
+        )
         axis.set_title(f"{column.replace('_', ' ').title()} by outcome")
     axes.flat[-1].axis("off")
     fig.tight_layout()
@@ -49,4 +51,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
