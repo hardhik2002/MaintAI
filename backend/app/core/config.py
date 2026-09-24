@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -12,7 +13,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite:///./maintai.db"
     model_path: Path = Path("ml/artifacts/model.joblib")
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
     history_limit: int = 500
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="MAINTAI_", extra="ignore")
